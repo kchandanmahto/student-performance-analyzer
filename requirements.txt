@@ -7,3 +7,5 @@ streamlit
 jupyter
 joblib
 pytest
+plotly
+tabulate

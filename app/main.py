@@ -13,21 +13,10 @@ from app.components.dashboard import render_dashboard
 
 
 st.set_page_config(
-    page_title="Student Performance Analyzer",
+    page_title="StudentIQ | Performance Intelligence",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-
-with st.sidebar:
-    st.title("📊 SPA Dashboard")
-    st.write("Student Performance Analyzer")
-    st.divider()
-    st.info(
-        "A Data Science project covering data collection, "
-        "analysis, preprocessing and machine learning."
-    )
-
 
 render_dashboard()
