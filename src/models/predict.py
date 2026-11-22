@@ -82,7 +82,6 @@ def predict_student_performance(
         raise ValueError("Invalid model choice. Select 1 or 2.")
 
     model_name, model_filename = MODEL_FILES[model_choice]
-
     model_path = MODEL_DIR / model_filename
 
     if not PREPROCESSOR_PATH.exists():
@@ -105,8 +104,12 @@ def predict_student_performance(
 
     transformed_data = preprocessor.transform(student_data)
 
-    prediction = model.predict(transformed_data)[0]
+    transformed_df = pd.DataFrame(
+        transformed_data,
+        columns=preprocessor.get_feature_names_out()
+    )
 
+    prediction = model.predict(transformed_df)[0]
     prediction = max(0, min(100, float(prediction)))
 
     return {
