@@ -1,0 +1,673 @@
+﻿
+
+========== main.py ==========
+from src.data.collection import collect_data
+from src.data.cleaning import run_cleaning
+
+
+def main():
+    print("=" * 50)
+    print("STUDENT PERFORMANCE ANALYZER")
+    print("=" * 50)
+
+    print("\nPHASE 2: DATA COLLECTION")
+    collect_data(n_students=500)
+
+    print("\nPHASE 3: DATA CLEANING")
+    run_cleaning()
+
+    print("\nData collection and cleaning completed!")
+
+
+if __name__ == "__main__":
+    main()
+
+
+========== src\data\collection.py ==========
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
+DATASET_PATH = RAW_DATA_DIR / "students.csv"
+
+
+def generate_synthetic_dataset(
+    n_students: int = 500,
+    random_state: int = 42,
+    include_data_issues: bool = True,
+) -> pd.DataFrame:
+    """Generate synthetic student performance data for practice."""
+
+    if n_students < 10:
+        raise ValueError("n_students must be at least 10.")
+
+    rng = np.random.default_rng(random_state)
+
+    attendance = rng.uniform(45, 100, n_students)
+    study_hours = rng.uniform(0.5, 10, n_students)
+    previous_marks = rng.uniform(30, 100, n_students)
+    assignment_score = rng.uniform(35, 100, n_students)
+
+    noise = rng.normal(0, 5, n_students)
+
+    final_marks = (
+        0.25 * attendance
+        + 3.0 * study_hours
+        + 0.35 * previous_marks
+        + 0.20 * assignment_score
+        + noise
+    )
+
+    final_marks = np.clip(final_marks, 0, 100)
+
+    data = {
+        "student_id": [
+            f"STU{i:04d}" for i in range(1, n_students + 1)
+        ],
+        "student_name": [
+            f"Student_{i:04d}" for i in range(1, n_students + 1)
+        ],
+        "attendance_percentage": np.round(attendance, 2),
+        "study_hours_per_day": np.round(study_hours, 2),
+        "previous_marks": np.round(previous_marks, 2),
+        "assignment_score": np.round(assignment_score, 2),
+        "final_marks": np.round(final_marks, 2),
+    }
+
+    df = pd.DataFrame(data)
+
+    if include_data_issues:
+        # Add missing values for the upcoming cleaning phase.
+        missing_rows = rng.choice(
+            df.index, size=max(1, n_students // 50), replace=False
+        )
+        df.loc[missing_rows, "attendance_percentage"] = np.nan
+
+        missing_rows = rng.choice(
+            df.index, size=max(1, n_students // 50), replace=False
+        )
+        df.loc[missing_rows, "assignment_score"] = np.nan
+
+        # Add a few duplicate records intentionally.
+        duplicate_count = min(5, n_students)
+        duplicates = df.sample(
+            n=duplicate_count, random_state=random_state
+        )
+        df = pd.concat([df, duplicates], ignore_index=True)
+
+    return df
+
+
+def collect_data(
+    n_students: int = 500,
+    random_state: int = 42,
+    include_data_issues: bool = True,
+) -> Path:
+    """Generate the dataset and save it as a CSV file."""
+
+    RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    df = generate_synthetic_dataset(
+        n_students=n_students,
+        random_state=random_state,
+        include_data_issues=include_data_issues,
+    )
+
+    df.to_csv(DATASET_PATH, index=False)
+
+    print("Data collection completed successfully.")
+    print(f"Dataset location: {DATASET_PATH}")
+    print(f"Total rows: {len(df)}")
+    print(f"Total columns: {len(df.columns)}")
+    print(f"Missing values: {int(df.isna().sum().sum())}")
+    print(f"Duplicate rows: {int(df.duplicated().sum())}")
+
+    return DATASET_PATH
+
+
+def load_dataset(file_path: Path = DATASET_PATH) -> pd.DataFrame:
+    """Load a CSV dataset into a Pandas DataFrame."""
+
+    if not file_path.exists():
+        raise FileNotFoundError(
+            f"Dataset not found: {file_path}. Run data collection first."
+        )
+
+    return pd.read_csv(file_path)
+
+
+if __name__ == "__main__":
+    collect_data()
+
+
+========== src\data\cleaning.py ==========
+from pathlib import Path
+
+import pandas as pd
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+RAW_DATA_PATH = PROJECT_ROOT / "data" / "raw" / "students.csv"
+PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
+CLEANED_DATA_PATH = PROCESSED_DIR / "cleaned_students.csv"
+
+REQUIRED_COLUMNS = [
+    "student_id",
+    "student_name",
+    "attendance_percentage",
+    "study_hours_per_day",
+    "previous_marks",
+    "assignment_score",
+    "final_marks",
+]
+
+NUMERIC_COLUMNS = [
+    "attendance_percentage",
+    "study_hours_per_day",
+    "previous_marks",
+    "assignment_score",
+    "final_marks",
+]
+
+
+def load_raw_data(file_path: Path = RAW_DATA_PATH) -> pd.DataFrame:
+    """Load the original student dataset."""
+
+    if not file_path.exists():
+        raise FileNotFoundError(
+            f"Raw dataset not found: {file_path}. "
+            "Run the data collection phase first."
+        )
+
+    return pd.read_csv(file_path)
+
+
+def validate_columns(df: pd.DataFrame) -> None:
+    """Check whether all required columns are available."""
+
+    missing_columns = [
+        column for column in REQUIRED_COLUMNS
+        if column not in df.columns
+    ]
+
+    if missing_columns:
+        raise ValueError(
+            f"Dataset is missing required columns: {missing_columns}"
+        )
+
+
+def clean_data(df: pd.DataFrame) -> pd.DataFrame:
+    """Clean missing values, duplicates and invalid records."""
+
+    validate_columns(df)
+
+    cleaned = df.copy()
+
+    # Remove duplicate records.
+    cleaned = cleaned.drop_duplicates()
+
+    # Convert numeric columns to numeric values.
+    for column in NUMERIC_COLUMNS:
+        cleaned[column] = pd.to_numeric(
+            cleaned[column], errors="coerce"
+        )
+
+    # Replace invalid values with missing values.
+    valid_ranges = {
+        "attendance_percentage": (0, 100),
+        "study_hours_per_day": (0, 24),
+        "previous_marks": (0, 100),
+        "assignment_score": (0, 100),
+        "final_marks": (0, 100),
+    }
+
+    for column, (minimum, maximum) in valid_ranges.items():
+        invalid = (
+            (cleaned[column] < minimum)
+            | (cleaned[column] > maximum)
+        )
+        cleaned.loc[invalid, column] = float("nan")
+
+    # Fill missing numerical values using the median.
+    for column in NUMERIC_COLUMNS:
+        median_value = cleaned[column].median()
+
+        if pd.isna(median_value):
+            raise ValueError(
+                f"Cannot clean {column}: all values are missing."
+            )
+
+        cleaned[column] = cleaned[column].fillna(median_value)
+
+    # Remove records without essential student identity.
+    cleaned["student_id"] = cleaned["student_id"].astype("string").str.strip()
+    cleaned["student_name"] = cleaned["student_name"].astype("string").str.strip()
+
+    cleaned = cleaned.dropna(
+        subset=["student_id", "student_name"]
+    )
+
+    cleaned = cleaned[
+        (cleaned["student_id"] != "")
+        & (cleaned["student_name"] != "")
+    ]
+
+    # Ensure each student ID is unique.
+    cleaned = cleaned.drop_duplicates(
+        subset=["student_id"], keep="first"
+    )
+
+    return cleaned.reset_index(drop=True)
+
+
+def save_cleaned_data(df: pd.DataFrame) -> Path:
+    """Save cleaned data to the processed directory."""
+
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    df.to_csv(CLEANED_DATA_PATH, index=False)
+
+    return CLEANED_DATA_PATH
+
+
+def run_cleaning() -> pd.DataFrame:
+    """Execute the complete data cleaning workflow."""
+
+    print("\n" + "=" * 50)
+    print("DATA CLEANING")
+    print("=" * 50)
+
+    raw_df = load_raw_data()
+
+    print(f"Original rows: {len(raw_df)}")
+    print(f"Original columns: {len(raw_df.columns)}")
+    print(f"Missing values before cleaning: {raw_df.isna().sum().sum()}")
+    print(f"Duplicate rows before cleaning: {raw_df.duplicated().sum()}")
+
+    cleaned_df = clean_data(raw_df)
+    output_path = save_cleaned_data(cleaned_df)
+
+    print("\nCleaning completed successfully.")
+    print(f"Rows after cleaning: {len(cleaned_df)}")
+    print(f"Missing values after cleaning: {cleaned_df.isna().sum().sum()}")
+    print(f"Duplicate rows after cleaning: {cleaned_df.duplicated().sum()}")
+    print(f"Unique student IDs: {cleaned_df['student_id'].nunique()}")
+    print(f"Saved file: {output_path}")
+
+    return cleaned_df
+
+
+if __name__ == "__main__":
+    run_cleaning()
+
+
+========== src\features\engineering.py ==========
+from pathlib import Path
+
+import pandas as pd
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+INPUT_PATH = PROJECT_ROOT / "data" / "processed" / "cleaned_students.csv"
+OUTPUT_PATH = PROJECT_ROOT / "data" / "processed" / "engineered_students.csv"
+
+
+def load_data():
+    if not INPUT_PATH.exists():
+        raise FileNotFoundError(
+            f"Cleaned dataset not found: {INPUT_PATH}"
+        )
+
+    return pd.read_csv(INPUT_PATH)
+
+
+def engineer_features(df):
+    df = df.copy()
+
+    required_columns = [
+        "attendance_percentage",
+        "study_hours_per_day",
+        "previous_marks",
+        "assignment_score",
+        "final_marks",
+    ]
+
+    missing_columns = [
+        col for col in required_columns if col not in df.columns
+    ]
+
+    if missing_columns:
+        raise ValueError(f"Missing columns: {missing_columns}")
+
+    # Feature 1: Average of previous marks and assignment score
+    df["internal_average"] = (
+        df["previous_marks"] + df["assignment_score"]
+    ) / 2
+
+    # Feature 2: Attendance category
+    df["attendance_category"] = pd.cut(
+        df["attendance_percentage"],
+        bins=[-1, 60, 75, 100],
+        labels=["Low", "Medium", "High"]
+    )
+
+    # Feature 3: Study category
+    df["study_category"] = pd.cut(
+        df["study_hours_per_day"],
+        bins=[-1, 2, 5, 24],
+        labels=["Low", "Medium", "High"]
+    )
+
+    # Feature 4: Academic engagement score
+    df["academic_engagement_score"] = (
+        0.5 * df["attendance_percentage"]
+        + 0.5 * (df["study_hours_per_day"] / 24 * 100)
+    )
+
+    # Feature 5: Previous academic performance category
+    df["previous_performance"] = pd.cut(
+        df["previous_marks"],
+        bins=[-1, 40, 60, 75, 100],
+        labels=["Poor", "Average", "Good", "Excellent"]
+    )
+
+    return df
+
+
+def save_engineered_data(df):
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(OUTPUT_PATH, index=False)
+    print(f"\nEngineered dataset saved: {OUTPUT_PATH}")
+
+
+def run_feature_engineering():
+    print("\n========== FEATURE ENGINEERING ==========")
+
+    df = load_data()
+
+    print("\nOriginal Shape:", df.shape)
+
+    engineered_df = engineer_features(df)
+
+    print("\nNew Shape:", engineered_df.shape)
+
+    print("\nNew Features:")
+    new_features = [
+        "internal_average",
+        "attendance_category",
+        "study_category",
+        "academic_engagement_score",
+        "previous_performance",
+    ]
+
+    print(engineered_df[new_features].head(10).to_string(index=False))
+
+    save_engineered_data(engineered_df)
+
+    print("\nFeature Engineering completed successfully!")
+
+
+if __name__ == "__main__":
+    run_feature_engineering()
+
+
+========== src\analysis\eda.py ==========
+from pathlib import Path
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DATA_PATH = PROJECT_ROOT / "data" / "processed" / "cleaned_students.csv"
+FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
+REPORT_PATH = PROJECT_ROOT / "reports" / "analysis_report.md"
+
+FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def load_data():
+    if not DATA_PATH.exists():
+        raise FileNotFoundError(
+            f"Cleaned dataset not found: {DATA_PATH}. Run data cleaning first."
+        )
+
+    return pd.read_csv(DATA_PATH)
+
+
+def generate_summary(df):
+    numeric_df = df.select_dtypes(include="number")
+
+    summary = numeric_df.describe().round(2)
+    correlation = numeric_df.corr().round(2)
+
+    return summary, correlation
+
+
+def create_visualizations(df):
+    sns.set_theme(style="whitegrid")
+
+    # 1. Final marks distribution
+    plt.figure(figsize=(8, 5))
+    sns.histplot(df["final_marks"], bins=20, kde=True)
+    plt.title("Distribution of Final Marks")
+    plt.xlabel("Final Marks")
+    plt.ylabel("Number of Students")
+    plt.tight_layout()
+    plt.savefig(FIGURES_DIR / "marks_distribution.png")
+    plt.close()
+
+    # 2. Study hours vs final marks
+    plt.figure(figsize=(8, 5))
+    sns.scatterplot(
+        data=df,
+        x="study_hours_per_day",
+        y="final_marks"
+    )
+    plt.title("Study Hours vs Final Marks")
+    plt.xlabel("Study Hours Per Day")
+    plt.ylabel("Final Marks")
+    plt.tight_layout()
+    plt.savefig(FIGURES_DIR / "study_hours_vs_marks.png")
+    plt.close()
+
+    # 3. Attendance vs final marks
+    plt.figure(figsize=(8, 5))
+    sns.scatterplot(
+        data=df,
+        x="attendance_percentage",
+        y="final_marks"
+    )
+    plt.title("Attendance vs Final Marks")
+    plt.xlabel("Attendance Percentage")
+    plt.ylabel("Final Marks")
+    plt.tight_layout()
+    plt.savefig(FIGURES_DIR / "attendance_vs_marks.png")
+    plt.close()
+
+    # 4. Correlation heatmap
+    numeric_df = df.select_dtypes(include="number")
+    plt.figure(figsize=(9, 6))
+    sns.heatmap(
+        numeric_df.corr(),
+        annot=True,
+        cmap="coolwarm",
+        fmt=".2f"
+    )
+    plt.title("Feature Correlation Heatmap")
+    plt.tight_layout()
+    plt.savefig(FIGURES_DIR / "correlation_heatmap.png")
+    plt.close()
+
+    print("All visualizations saved successfully.")
+
+
+def generate_report(df, summary, correlation):
+    report = f"""# Student Performance Analysis Report
+
+## Dataset Overview
+
+- Total students: {len(df)}
+- Total columns: {len(df.columns)}
+- Missing values: {df.isnull().sum().sum()}
+
+## Statistical Summary
+
+{summary.to_markdown()}
+
+## Correlation Analysis
+
+{correlation.to_markdown()}
+
+## Key Observations
+
+- Average final marks: {df['final_marks'].mean():.2f}
+- Highest final marks: {df['final_marks'].max():.2f}
+- Lowest final marks: {df['final_marks'].min():.2f}
+- Average attendance: {df['attendance_percentage'].mean():.2f}%
+- Average study hours: {df['study_hours_per_day'].mean():.2f} hours/day
+
+## Visualizations
+
+See the `reports/figures/` folder for generated charts.
+"""
+
+    REPORT_PATH.write_text(report, encoding="utf-8")
+    print(f"Analysis report saved: {REPORT_PATH}")
+
+
+def run_eda():
+    print("\n========== EXPLORATORY DATA ANALYSIS ==========")
+
+    df = load_data()
+
+    print("\nDataset Shape:", df.shape)
+    print("\nFirst 5 Rows:")
+    print(df.head().to_string(index=False))
+
+    summary, correlation = generate_summary(df)
+
+    print("\nStatistical Summary:")
+    print(summary)
+
+    print("\nCorrelation Matrix:")
+    print(correlation)
+
+    create_visualizations(df)
+    generate_report(df, summary, correlation)
+
+    print("\nEDA completed successfully!")
+
+
+if __name__ == "__main__":
+    run_eda()
+
+
+========== src\models\evaluate.py ==========
+from pathlib import Path
+
+import joblib
+import pandas as pd
+
+from sklearn.metrics import (
+    mean_absolute_error,
+    mean_squared_error,
+    r2_score
+)
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+TEST_PATH = PROJECT_ROOT / "data" / "processed" / "test_data.csv"
+MODEL_DIR = PROJECT_ROOT / "models"
+REPORT_DIR = PROJECT_ROOT / "reports"
+
+TARGET = "final_marks"
+
+MODEL_FILES = {
+    "Linear Regression": "linear_regression.joblib",
+    "Random Forest": "random_forest.joblib",
+}
+
+
+def load_test_data():
+    if not TEST_PATH.exists():
+        raise FileNotFoundError("Test dataset not found. Run preprocessing first.")
+
+    df = pd.read_csv(TEST_PATH)
+
+    if TARGET not in df.columns:
+        raise ValueError(f"Target column '{TARGET}' not found.")
+
+    X_test = df.drop(columns=[TARGET])
+    y_test = df[TARGET]
+
+    return X_test, y_test
+
+
+def evaluate_models(X_test, y_test):
+    results = []
+
+    for model_name, filename in MODEL_FILES.items():
+        model_path = MODEL_DIR / filename
+
+        if not model_path.exists():
+            raise FileNotFoundError(
+                f"{filename} not found. Run model training first."
+            )
+
+        model = joblib.load(model_path)
+
+        predictions = model.predict(X_test)
+
+        mse = mean_squared_error(y_test, predictions)
+
+        metrics = {
+            "Model": model_name,
+            "MAE": mean_absolute_error(y_test, predictions),
+            "MSE": mse,
+            "RMSE": mse ** 0.5,
+            "R2 Score": r2_score(y_test, predictions),
+        }
+
+        results.append(metrics)
+
+    return pd.DataFrame(results)
+
+
+def save_results(results):
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+
+    output_path = REPORT_DIR / "model_evaluation.csv"
+    results.to_csv(output_path, index=False)
+
+    print(f"\nEvaluation results saved: {output_path}")
+
+
+def run_evaluation():
+    print("\n========== MODEL EVALUATION ==========")
+
+    X_test, y_test = load_test_data()
+
+    print("Testing Records:", len(X_test))
+
+    results = evaluate_models(X_test, y_test)
+
+    print("\nModel Performance:")
+    print(results.round(4).to_string(index=False))
+
+    best_model = results.loc[results["MAE"].idxmin(), "Model"]
+
+    print("\nBest Model based on MAE:", best_model)
+
+    save_results(results)
+
+    print("\nModel evaluation completed successfully!")
+
+
+if __name__ == "__main__":
+    run_evaluation()
