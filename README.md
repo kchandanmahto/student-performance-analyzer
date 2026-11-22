@@ -3,7 +3,7 @@
 
 # CKMHTO.AI
 
-### INNOVATION • INTELLIGENCE • TECHNOLOGY
+**INNOVATION • INTELLIGENCE • TECHNOLOGY**
 
 <br>
 
@@ -15,10 +15,11 @@
 
 <br>
 
-[![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
-[![Scikit-learn](https://img.shields.io/badge/ML-Scikit--learn-orange?logo=scikitlearn)](https://scikit-learn.org/)
-[![Status](https://img.shields.io/badge/Status-Live-success)](https://studentiq-ckmhto.streamlit.app/)
+[![Scikit-learn](https://img.shields.io/badge/Machine%20Learning-Scikit--learn-F7931E?logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
+[![Pytest](https://img.shields.io/badge/Testing-Pytest-0A9EDC?logo=pytest&logoColor=white)](https://pytest.org/)
+[![Deployment](https://img.shields.io/badge/Deployment-Live-success)](https://studentiq-ckmhto.streamlit.app/)
 
 <br>
 
@@ -26,34 +27,35 @@
 
 <br>
 
-[**Live Demo**](https://studentiq-ckmhto.streamlit.app/) •
-[**Source Code**](https://github.com/kchandanmahto/student-performance-analyzer)
+[Live Application](https://studentiq-ckmhto.streamlit.app/) ·
+[Source Code](https://github.com/kchandanmahto/student-performance-analyzer) ·
+[Developer Portfolio](https://ckmhto-ai.vercel.app/)
 
 </div>
 
 ---
 
-## About StudentIQ
+## Overview
 
-**StudentIQ** is a student performance analytics and prediction platform developed under the **CKMHTO.AI** brand.
+**StudentIQ** is a Student Performance Analytics and Prediction Platform developed under the **CKMHTO.AI** brand.
 
-It transforms academic data into meaningful insights using data science, statistical analysis, data visualization, and machine learning.
+The platform uses data science, statistical analysis, data visualization, and machine learning to transform academic records into meaningful insights.
 
-The platform helps users explore student performance patterns, understand academic indicators, compare predictive models, and estimate marks using trained regression models.
+It provides an interactive environment to explore student data, understand academic performance patterns, evaluate regression models, and estimate student marks using trained machine learning models.
 
 ## Live Application
 
-Experience StudentIQ:
+Explore the deployed application:
 
-**[Launch StudentIQ Dashboard](https://studentiq-ckmhto.streamlit.app/)**
+**[Launch StudentIQ Dashboard →](https://studentiq-ckmhto.streamlit.app/)**
 
-The application is deployed using Streamlit Community Cloud.
+The application is deployed on Streamlit Community Cloud.
 
-## Key Features
+## Features
 
 - Student dataset collection and management
 - Data cleaning and missing-value handling
-- Duplicate detection and removal
+- Duplicate record detection and removal
 - Exploratory Data Analysis (EDA)
 - Academic feature engineering
 - Data preprocessing and transformation
@@ -62,53 +64,211 @@ The application is deployed using Streamlit Community Cloud.
 - Interactive analytics dashboard
 - Model evaluation and comparison
 - Dataset exploration
-- Automated testing
+- Automated test coverage
 
-## Core Modules
+## Platform Modules
 
-| Module | Responsibility |
+| Module | Description |
 |---|---|
-| Data Management | Collecting and cleaning student records |
-| Exploratory Analysis | Discovering patterns and relationships |
-| Feature Engineering | Creating meaningful academic indicators |
-| Preprocessing | Preparing data for machine learning |
-| Model Training | Training regression algorithms |
-| Prediction Engine | Estimating student marks |
-| Model Evaluation | Measuring predictive performance |
-| Dashboard | Presenting analytics through an interactive interface |
+| Data Collection | Collecting and managing student records |
+| Data Cleaning | Handling missing values and duplicate records |
+| Exploratory Data Analysis | Exploring distributions, trends, and relationships |
+| Feature Engineering | Creating useful academic indicators |
+| Data Preprocessing | Preparing features for machine learning |
+| Model Training | Training regression models |
+| Prediction Engine | Estimating student marks from input features |
+| Model Evaluation | Measuring model performance |
+| Interactive Dashboard | Presenting results and analytics through Streamlit |
 
 ## Technology Stack
 
-| Category | Technologies |
+| Area | Technology |
 |---|---|
 | Programming Language | Python 3.12 |
 | Data Analysis | Pandas, NumPy |
 | Data Visualization | Matplotlib, Seaborn, Plotly |
 | Machine Learning | Scikit-learn |
-| Web Dashboard | Streamlit |
+| Dashboard | Streamlit |
 | Model Persistence | Joblib |
 | Testing | Pytest |
-| Development | Jupyter Notebook, VS Code |
+| Notebooks | Jupyter Notebook |
+| Development Environment | Visual Studio Code |
 
 ## Machine Learning Models
 
-StudentIQ currently implements two regression algorithms:
+StudentIQ currently includes two regression models for student marks prediction.
 
-**1. Linear Regression**
+### 1. Linear Regression
 
-A baseline regression model used to estimate student marks from academic features.
+A baseline regression algorithm that estimates student marks based on the selected academic features.
 
-**2. Random Forest Regressor**
+### 2. Random Forest Regressor
 
-An ensemble learning model that combines multiple decision trees to estimate student performance.
+An ensemble learning algorithm that combines multiple decision trees to estimate student performance.
 
-### Model Evaluation Metrics
+### Model Evaluation
 
-Models are evaluated using:
+The project uses the following regression evaluation metrics:
 
-- **MAE:** Mean Absolute Error
-- **MSE:** Mean Squared Error
-- **RMSE:** Root Mean Squared Error
-- **R² Score:** Coefficient of Determination
+| Metric | Purpose |
+|---|---|
+| MAE | Measures average absolute prediction error |
+| MSE | Measures average squared prediction error |
+| RMSE | Measures prediction error on the target scale |
+| R² Score | Measures the proportion of variance explained by the model |
 
-Model performance can be compared through the evaluation reports generated by the project.
+Model evaluation results are available through the project's evaluation reports.
+
+## Project Structure
+
+```text
+student-performance-analyzer/
+│
+├── app/
+│   ├── main.py
+│   └── components/
+│       └── dashboard.py
+│
+├── data/
+│   ├── raw/
+│   └── processed/
+│
+├── models/
+│   ├── linear_regression.joblib
+│   ├── random_forest.joblib
+│   └── preprocessor.joblib
+│
+├── notebooks/
+│   ├── 01_data_collection.ipynb
+│   ├── 02_data_cleaning.ipynb
+│   ├── 03_exploratory_data_analysis.ipynb
+│   ├── 04_feature_engineering.ipynb
+│   ├── 05_data_transformation.ipynb
+│   └── 06_model_experimentation.ipynb
+│
+├── reports/
+│   ├── analysis_report.md
+│   ├── model_evaluation.csv
+│   └── figures/
+│
+├── src/
+│   ├── analysis/
+│   ├── data/
+│   ├── features/
+│   ├── models/
+│   └── visualization/
+│
+├── tests/
+│
+├── main.py
+├── requirements.txt
+└── README.md
+```
+
+## Installation and Setup
+
+### Prerequisites
+
+- Python 3.12
+- Git
+- pip
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/kchandanmahto/student-performance-analyzer.git
+
+cd student-performance-analyzer
+```
+
+### 2. Create a Virtual Environment
+
+Windows PowerShell:
+
+```powershell
+python -m venv .venv
+
+.\.venv\Scripts\Activate.ps1
+```
+
+### 3. Install Dependencies
+
+```bash
+python -m pip install --upgrade pip
+
+pip install -r requirements.txt
+```
+
+### 4. Run the Application
+
+```bash
+streamlit run main.py
+```
+
+Open the local URL displayed in the terminal.
+
+## Testing
+
+StudentIQ uses Pytest for automated testing.
+
+Run the complete test suite:
+
+```bash
+python -m pytest -v
+```
+
+Check installed dependency consistency:
+
+```bash
+python -m pip check
+```
+
+## Data and Model Notes
+
+The project uses student academic records for data analysis and model experimentation.
+
+The trained models and preprocessing artifacts are stored using Joblib.
+
+Use synthetic or properly anonymized student data when sharing datasets publicly. Do not upload personally identifiable student information.
+
+Model predictions are estimates based on the available training data and input features. They should not be treated as guaranteed academic outcomes.
+
+## Current Status
+
+The StudentIQ dashboard is deployed and its prediction functionality is available through the live application.
+
+The repository includes data processing modules, analysis notebooks, trained model artifacts, evaluation reports, and automated tests.
+
+## Project Information
+
+| Field | Details |
+|---|---|
+| Product | StudentIQ |
+| Category | Data Science & Machine Learning |
+| Brand | CKMHTO.AI |
+| Developer | Chandan Kumar |
+| Language | Python |
+| Interface | Streamlit |
+| Repository | Public GitHub Project |
+| Deployment | Streamlit Community Cloud |
+
+## Developer
+
+<div align="center">
+
+### Chandan Kumar
+
+**AI & Data Science Developer**
+
+Building practical software solutions with data science, machine learning, and intelligent technologies.
+
+[Portfolio](https://ckmhto-ai.vercel.app/) ·
+[GitHub](https://github.com/kchandanmahto)
+
+<br>
+
+**CKMHTO.AI**
+
+*Innovation • Intelligence • Technology*
+
+</div>

@@ -1,0 +1,15 @@
+
+blank_issues_enabled: false
+
+contact_links:
+  - name: StudentIQ Live Application
+    url: https://studentiq-ckmhto.streamlit.app/
+    about: Explore the live StudentIQ analytics and prediction dashboard.
+
+  - name: StudentIQ Documentation
+    url: https://github.com/kchandanmahto/student-performance-analyzer#readme
+    about: Read the project overview, setup instructions, and documentation.
+
+  - name: Developer Portfolio
+    url: https://ckmhto-ai.vercel.app/
+    about: Visit the CKMHTO.AI developer portfolio.
