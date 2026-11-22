@@ -124,6 +124,11 @@ Model evaluation results are available through the project's evaluation reports.
 ```text
 student-performance-analyzer/
 │
+├── .github/
+│   ├── ISSUE_TEMPLATE/
+│   ├── workflows/
+│   └── PULL_REQUEST_TEMPLATE.md
+│
 ├── app/
 │   ├── main.py
 │   └── components/
@@ -133,23 +138,16 @@ student-performance-analyzer/
 │   ├── raw/
 │   └── processed/
 │
+├── docs/
+│
 ├── models/
 │   ├── linear_regression.joblib
 │   ├── random_forest.joblib
 │   └── preprocessor.joblib
 │
 ├── notebooks/
-│   ├── 01_data_collection.ipynb
-│   ├── 02_data_cleaning.ipynb
-│   ├── 03_exploratory_data_analysis.ipynb
-│   ├── 04_feature_engineering.ipynb
-│   ├── 05_data_transformation.ipynb
-│   └── 06_model_experimentation.ipynb
 │
 ├── reports/
-│   ├── analysis_report.md
-│   ├── model_evaluation.csv
-│   └── figures/
 │
 ├── src/
 │   ├── analysis/
@@ -162,6 +160,7 @@ student-performance-analyzer/
 │
 ├── main.py
 ├── requirements.txt
+├── pytest.ini
 └── README.md
 ```
 
@@ -223,6 +222,21 @@ Check installed dependency consistency:
 python -m pip check
 ```
 
+## Documentation
+
+Project documentation is available in the `docs/` directory.
+
+- [System Architecture](docs/ARCHITECTURE.md)
+- [Data Dictionary](docs/DATA_DICTIONARY.md)
+- [Development Guide](docs/DEVELOPMENT.md)
+- [Machine Learning](docs/MACHINE_LEARNING.md)
+- [Deployment Guide](docs/DEPLOYMENT.md)
+- [Testing Guide](docs/TESTING.md)
+- [Contributing Guidelines](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Support](SUPPORT.md)
+- [Changelog](CHANGELOG.md)
+
 ## Data and Model Notes
 
 The project uses student academic records for data analysis and model experimentation.
@@ -237,7 +251,7 @@ Model predictions are estimates based on the available training data and input f
 
 The StudentIQ dashboard is deployed and its prediction functionality is available through the live application.
 
-The repository includes data processing modules, analysis notebooks, trained model artifacts, evaluation reports, and automated tests.
+The repository includes data processing modules, analysis notebooks, trained model artifacts, evaluation reports, automated tests, and project documentation.
 
 ## Project Information
 
